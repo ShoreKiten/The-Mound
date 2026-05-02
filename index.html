@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Mound</title>
+    <link rel="stylesheet" href="./src/style/main.css" type="text/css" />
+  </head>
+  <body>
+    <div id="game-container">
+      <header id="top-bar" aria-label="resources"></header>
+      <main id="layout">
+        <section id="left-panel" aria-label="event-log">
+          <div id="log-stream"></div>
+        </section>
+        <section id="right-panel" aria-label="actions">
+          <div id="action-list">
+            <div id="panel-logistics"></div>
+            <div id="panel-deep-space"></div>
+          </div>
+        </section>
+      </main>
+      <div id="state-proxy-debug-hud" hidden aria-hidden="true">
+        <span data-state-path="resources.power"></span>
+        <span data-state-path="resources.stardust"></span>
+        <span data-state-path="resources.fuel"></span>
+        <span data-state-path="oxygen"></span>
+      </div>
+    </div>
+    <script src="./src/core/engine.js" type="module"></script>
+  </body>
+</html>
