@@ -1,3 +1,5 @@
+/** @file Omega boss checkpoint — saves/restores time anchor state around the 200,000 km encounter. */
+
 import { moundState } from "./state.js";
 import { getEngineApi, getUiApi } from "./runtime-hooks.js";
 

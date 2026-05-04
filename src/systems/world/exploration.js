@@ -1,3 +1,5 @@
+/** @file Exploration system — deep space scanning, outpost discovery, and region progression. */
+
 import { gameState, moundState } from "../../core/state.js";
 import { getEngineApi } from "../../core/runtime-hooks.js";
 import { syncColonyCapacityInDraft } from "../colony-cap.js";

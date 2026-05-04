@@ -1,3 +1,5 @@
+/** @file Economy system entry — resource production/consumption tick applied per game cycle. */
+
 import { gameState as rootGameState } from "../../core/state.js";
 import { getEngineApi } from "../../core/runtime-hooks.js";
 import { syncColonyCapacityInDraft } from "../colony-cap.js";

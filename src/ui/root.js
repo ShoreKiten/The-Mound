@@ -1,3 +1,5 @@
+/** @file Main UI manager — button definitions, action rendering, top bar, panel decks, cooldowns, and ending intercept. */
+
 import { gameState, moundState } from "../core/state.js";
 import { MoundEngine } from "../core/engine-runtime.js";
 import { MAX_LOG_LINES, renderStream as renderLogStream } from "./components/log.js";
@@ -21,7 +23,7 @@ import {
 } from "./components.js";
 import { createTacticalCenterPanel } from "./TacticalCenter.js";
 import { showCombatModal as showCombatModalFn } from "./CombatModal.js";
-import { renderEndingScreen, renderDefeatScreen, renderEvacScreen } from "./EndingOverlay.js";
+
 import { renderExpeditionConsole, applySpaceTheme, refreshThrustUI as refreshThrustUiBridge } from "./bridge.js";
 import { initDeepSpaceInputDelegation } from "./input-handler.js";
 import { initBackgroundEffect } from "./background-effect.js";
@@ -199,14 +201,10 @@ function formatInt(value) {
   if (typeof value !== "number" || Number.isNaN(value)) {
     return value;
   }
-  return Math.floor(value);
+  return Math.round(value);
 }
 
-function isInitialIdleState() {
-  const exp = gameState && gameState.systems && gameState.systems.expedition;
-  const distance = Number(exp ? exp.distanceKm : 0);
-  return distance < 1 && !state.isVaultRepaired;
-}
+
 
 function safeSetText(node, value) {
   if (!node) {
@@ -257,14 +255,14 @@ const buttonDefs = {
     label: "扫除星尘",
     cooldownMs: 2000,
     group: "basic",
-    visible: () => Number(state.ionCatchers || 0) < 1,
+    visible: () => (state.systems?.expedition?.distanceKm ?? 0) < 200000 && Number(state.ionCatchers || 0) === 0,
     action: gainStardust
   },
   scrap: {
     label: "撬动废金属",
     cooldownMs: 3000,
     group: "basic",
-    visible: () => Number(state.arrays || 0) < 1 && state.resources.stardust > 0,
+    visible: () => (state.systems?.expedition?.distanceKm ?? 0) < 200000 && Number(state.arrays || 0) === 0,
     action: gainScrapMetal
   },
   reactor: {
@@ -1102,7 +1100,7 @@ function getTopBarVisualSnapshot() {
   return {
     radiation: `辐射值: ${formatInt(state.resources.radiation)}`,
     stardust: `星尘: ${formatInt(state.resources.stardust)}`,
-    scrapMetal: `废金属: ${formatInt(state.resources.scrapMetal)}`,
+    scrapMetal: `废金属: ${Number(state.resources.scrapMetal || 0).toFixed(2)}`,
     sealant: `密封剂: ${formatInt(state.resources.sealant)}`,
     alloy: `合金: ${formatInt(state.resources.alloy)}`,
     helium3: `氦-3: ${formatInt(state.resources.helium3)}`,
@@ -1641,54 +1639,7 @@ function showOutpostMenu() {
 }
 
 function performRenderAll(force) {
-  // === ENDING SEQUENCE — absolute top priority, blocks everything ===
-  // Only hijack rendering when the overlay is PHYSICALLY in the DOM.
-  // A bare endingActive flag without a DOM overlay is either a stale
-  // auto-save remnant or the very first cycle after endCombat set the
-  // flag — in both cases we must NOT block combat initialisation.
-  const endingActive = !!(state.flags && state.flags.endingActive);
-  const endingOverlayInDom = typeof document !== "undefined" && document.getElementById("ending-overlay");
-  if (endingActive && endingOverlayInDom) {
-    if (uiRenderTimer) {
-      clearTimeout(uiRenderTimer);
-      uiRenderTimer = null;
-    }
-    const staleModal = document.getElementById("combat-modal-container");
-    if (staleModal && staleModal.parentNode) {
-      staleModal.parentNode.removeChild(staleModal);
-    }
-    if (document.body) {
-      document.body.classList.remove("combat-active");
-    }
-    return;
-  }
-  if (endingActive && !endingOverlayInDom) {
-    // First render cycle after endCombat / handleFlee set the ending flag
-    // but before the overlay exists.  Create it now.
-    if (uiRenderTimer) {
-      clearTimeout(uiRenderTimer);
-      uiRenderTimer = null;
-    }
-    if (typeof document !== "undefined") {
-      const staleModal = document.getElementById("combat-modal-container");
-      if (staleModal && staleModal.parentNode) {
-        staleModal.parentNode.removeChild(staleModal);
-      }
-      if (document.body) {
-        document.body.classList.remove("combat-active");
-      }
-    }
-    const isDefeat = !!(state.flags && state.flags.endingIsDefeat);
-    const isEvac = !!(state.flags && state.flags.endingIsEvac);
-    if (isEvac) {
-      renderEvacScreen();
-    } else if (isDefeat) {
-      renderDefeatScreen();
-    } else {
-      renderEndingScreen();
-    }
-    return;
-  }
+  if (state.flags?.endingActive && document.getElementById("ending-overlay")) return;
 
   // === COMBAT MODAL — absolute top, independent of tab/deck logic ===
   const showCombatModal = !!(state.systems && state.systems.ui && state.systems.ui.showCombatModal);
@@ -1811,11 +1762,7 @@ function initUI() {
     stateUnsubscribe();
     stateUnsubscribe = null;
   }
-  if (!isInitialIdleState()) {
-    startEngine();
-  } else {
-    console.warn("[UIRoot] 初始静态态：已跳过非必要引擎启动。");
-  }
+  startEngine();
   registerApplyDeckInDraft(applyGameDeckInDraft);
   renderAll(true);
   syncResourceBarVisuals(false);
@@ -1912,7 +1859,10 @@ function initUI() {
           path === "isVaultRepaired" ||
           path === "blueprints" ||
           path.startsWith("blueprints.") ||
-          path === "techEraEnabled";
+          path === "techEraEnabled" ||
+          path === "arrays" ||
+          path === "ionCatchers" ||
+          path === "autoSynthesizers";
 
         if (isResourceUpdate) {
           scheduleUiRender(() => renderTopBar());

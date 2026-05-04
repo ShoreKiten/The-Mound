@@ -1,5 +1,7 @@
+/** @file Event pool — registers MOUND_EVENTS on global scope and hooks them into the game tick. */
+
 import { gameState } from "../../core/state.js";
-import { MOUND_EVENTS } from "../../data/event-pool.js";
+import { MOUND_EVENTS } from "./event-data.js";
 
 (() => {
 window.MoundEvents = MOUND_EVENTS.map((entry) => Object.assign({}, entry));

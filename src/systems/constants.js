@@ -1,3 +1,5 @@
+/** @file Game-wide constants — tech caps, conversion rates, and legacy data registries. */
+
 (() => {
   const MAX_TECH_LEVEL = 10;
   const CONVERSION_RATE = 100;

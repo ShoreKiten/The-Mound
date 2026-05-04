@@ -1,3 +1,5 @@
+/** @file Expedition console bridge — renders voyage panel, throttle UI, and deep-space status. */
+
 import { gameState, moundState } from "../core/state.js";
 import { setUiSpaceApi, getUiApi, getEngineApi } from "../core/runtime-hooks.js";
 

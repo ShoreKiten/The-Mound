@@ -1,3 +1,5 @@
+/** @file Web Worker — runs game tick logic off the main thread, posts STATE_PATCH deltas back to engine.js. */
+
 /* eslint-disable no-restricted-globals */
 (() => {
   const TICK_RATE = 100;
@@ -63,14 +65,9 @@
     "lastEventMilestone",
     "resources.techPoints",
     "resources.singularity",
-    "singularity",
     "resources.power",
     "resources.oxygen",
-    "resources.scrapMetal",
-    "resources.stardust",
-    "resources.alloy",
-    "resources.sealant",
-    "resources.helium3",
+    "singularity",
     "systems.oxygenCriticalLogged",
     "systems.productionSpeedBonusPct",
     "systems.ui.outpostMenuLocked",

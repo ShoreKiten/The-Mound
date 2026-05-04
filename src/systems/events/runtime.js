@@ -1,6 +1,8 @@
+/** @file Milestone event runtime — triggers pivot decisions at key distance checkpoints (60k-90k km). */
+
 import { getUiSpaceApi, getUiApi } from "../../core/runtime-hooks.js";
 import { saveGame } from "../../core/storage.js";
-import { PIVOT_MILESTONE_KEYS, PIVOT_MILESTONE_DECISIONS } from "../../data/milestone-events.js";
+import { PIVOT_MILESTONE_KEYS, PIVOT_MILESTONE_DECISIONS } from "./milestone-data.js";
 
 (() => {
   // Runtime event helpers only.

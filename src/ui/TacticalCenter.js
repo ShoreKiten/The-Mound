@@ -1,3 +1,5 @@
+/** @file Tactical center panel — weapon/defense upgrade UI in the space command deck. */
+
 import { gameState, moundState } from "../core/state.js";
 import { getUiApi } from "../core/runtime-hooks.js";
 import {

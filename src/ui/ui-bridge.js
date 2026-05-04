@@ -86,7 +86,7 @@ function formatTopBarLine(bindPath, state) {
     case "resources.stardust":
       return `星尘: ${formatInt(s.resources.stardust)}`;
     case "resources.scrapMetal":
-      return `废金属: ${formatInt(s.resources.scrapMetal)}`;
+      return `废金属: ${Number(s.resources.scrapMetal || 0).toFixed(2)}`;
     case "resources.sealant":
       return `密封剂: ${formatInt(s.resources.sealant)}`;
     case "resources.alloy":

@@ -312,6 +312,10 @@ export function renderEndingScreen() {
   purgeCombatDom();
   lockoutKeyboard();
 
+  moundState.setState((draft) => {
+    draft.flags.endingActive = true;
+  });
+
   if (sequenceRunning || overlayRoot) {
     return;
   }
@@ -331,6 +335,11 @@ export function renderDefeatScreen() {
   purgeCombatDom();
   lockoutKeyboard();
 
+  moundState.setState((draft) => {
+    draft.flags.endingActive = true;
+    draft.flags.endingIsDefeat = true;
+  });
+
   if (sequenceRunning || overlayRoot) {
     return;
   }
@@ -349,6 +358,11 @@ export function renderEvacScreen() {
   stopRenderLoop();
   purgeCombatDom();
   lockoutKeyboard();
+
+  moundState.setState((draft) => {
+    draft.flags.endingActive = true;
+    draft.flags.endingIsEvac = true;
+  });
 
   if (sequenceRunning || overlayRoot) {
     return;

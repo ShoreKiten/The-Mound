@@ -1,3 +1,5 @@
+/** @file Raw event definitions — ambient log entries, hazards, and one-shot narrative events. */
+
 export const MOUND_EVENTS = Object.freeze([
   { id: "screen-noise", text: "屏幕有雪花。", once: true, group: "hazard" },
   { id: "outside-knock", text: "舱外有敲击声。", once: true, group: "hazard" },

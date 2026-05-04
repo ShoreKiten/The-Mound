@@ -1,3 +1,5 @@
+/** @file Background starfield canvas — animated parallax stars effect behind all UI layers. */
+
 const STARFIELD_CANVAS_ID = "starfield-canvas";
 
 let rafId = 0;

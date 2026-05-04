@@ -6,6 +6,7 @@
 import { generateEncounter, calculateEscapePenalty, createOmegaEncounter, computeBossHPThresholds } from "./EnemySystem.js";
 import { gameState, moundState } from "../../core/state.js";
 import { getUiApi, getWorkerBridge } from "../../core/runtime-hooks.js";
+import { renderEndingScreen, renderDefeatScreen } from "../../ui/EndingOverlay.js";
 
 function syncStateToWorker() {
   const bridge = getWorkerBridge();
@@ -1217,19 +1218,11 @@ export async function endCombat(kind, addLog) {
   const isOmegaVictory = !!(moundState.state.flags && moundState.state.flags.omegaDefeated);
 
   if (isOmegaVictory) {
-    moundState.setState((draft) => {
-      draft.flags = draft.flags || {};
-      draft.flags.endingActive = true;
-    });
     syncStateToWorker();
     if (typeof document !== "undefined" && document.body) {
       document.body.classList.remove("combat-active");
     }
-    // Use a fresh UI API reference — the captured `ui` may be stale after the 5 s await.
-    const uiFresh = getUiApi();
-    if (uiFresh && typeof uiFresh.renderAll === "function") {
-      uiFresh.renderAll(true);
-    }
+    renderEndingScreen();
     return;
   }
 
@@ -1237,19 +1230,11 @@ export async function endCombat(kind, addLog) {
   const isOmegaDefeat = !!(moundState.state.flags && moundState.state.flags.omegaEndingDefeat);
 
   if (isOmegaDefeat) {
-    moundState.setState((draft) => {
-      draft.flags = draft.flags || {};
-      draft.flags.endingActive = true;
-      draft.flags.endingIsDefeat = true;
-    });
     syncStateToWorker();
     if (typeof document !== "undefined" && document.body) {
       document.body.classList.remove("combat-active");
     }
-    const uiFresh = getUiApi();
-    if (uiFresh && typeof uiFresh.renderAll === "function") {
-      uiFresh.renderAll(true);
-    }
+    renderDefeatScreen();
     return;
   }
 

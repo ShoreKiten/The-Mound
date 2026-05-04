@@ -1,3 +1,5 @@
+/** @file Reactive state (Proxy-based) with path subscriptions, auto-save to localStorage, and Worker bridge sync. */
+
 import {
   getApplyingWorkerPatch,
   getWorkerMode,
@@ -235,6 +237,8 @@ let exportedMoundState = null;
       omegaDefeated: false,
       omegaSlayer: false,
       omegaEndingDefeat: false,
+      endingIsDefeat: false,
+      endingIsEvac: false,
       isInCombat: false,
       endingActive: false
     },

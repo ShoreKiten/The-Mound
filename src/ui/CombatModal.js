@@ -1,3 +1,5 @@
+/** @file Turn-based combat modal — renders the tactical encounter UI, player actions, and flee/evac logic. */
+
 import { gameState, moundState } from "../core/state.js";
 import { calculateEscapePenalty } from "../systems/expedition/EnemySystem.js";
 import {
@@ -9,6 +11,7 @@ import {
   playerCombatAction
 } from "../systems/expedition/CombatManager.js";
 import { getWorkerBridge, getUiApi } from "../core/runtime-hooks.js";
+import { renderEvacScreen } from "./EndingOverlay.js";
 
 // Module-scope constants — shared by showCombatModal() and refreshModalDisplay()
 const C_BORDER = "#333";
@@ -221,17 +224,9 @@ function handleFlee() {
     fleeCombat(state, moundState.setState, (msg) => pushCombatLog(msg));
     pushCombatLog("[ 紧急撤离 ] 远征号全推力脱离战斗区域。");
 
-    moundState.setState((draft) => {
-      draft.flags = draft.flags || {};
-      draft.flags.endingActive = true;
-      draft.flags.endingIsEvac = true;
-    });
     syncStateToWorker();
 
-    const ui = getUiApi();
-    if (ui && typeof ui.renderAll === "function") {
-      ui.renderAll(true);
-    }
+    renderEvacScreen();
     return;
   }
 

@@ -1,3 +1,5 @@
+/** @file Pivot milestone definitions — decision trees at 60k/70k/80k/90k km checkpoints. */
+
 export const PIVOT_MILESTONE_KEYS = Object.freeze([60000, 70000, 80000, 90000]);
 
 export const PIVOT_MILESTONE_DECISIONS = Object.freeze({

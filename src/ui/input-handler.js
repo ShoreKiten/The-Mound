@@ -1,3 +1,5 @@
+/** @file Deep space input delegation — keyboard shortcuts and throttle/overdrive bindings. */
+
 import { MoundEngine } from "../core/engine-runtime.js";
 import { gameState, moundState } from "../core/state.js";
 import { getUiApi } from "../core/runtime-hooks.js";

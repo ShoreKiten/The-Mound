@@ -1,3 +1,5 @@
+/** @file Building cost definitions and construction requirement lookups. */
+
 export const BUILDING_COSTS = Object.freeze({
   magneticArray: Object.freeze({ scrapMetal: 10, sealant: 5 }),
   ionCatcher: Object.freeze({ scrapMetal: 40, sealant: 5 }),

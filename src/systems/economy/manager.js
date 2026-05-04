@@ -1,3 +1,5 @@
+/** @file Economy manager — resource affordability checks, deduction, and rate calculations. */
+
 function safeNum(value) {
   return Number.isFinite(value) ? value : 0;
 }

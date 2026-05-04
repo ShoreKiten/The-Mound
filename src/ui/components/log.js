@@ -1,3 +1,5 @@
+/** @file Event log component — streaming terminal-style log with DOM recycling for performance. */
+
 import { moundState } from "../../core/state.js";
 import { getEngineApi, getUiApi } from "../../core/runtime-hooks.js";
 import { saveTimeAnchor, loadTimeAnchor, isCombatActive } from "../../core/time-anchor.js";

@@ -1,3 +1,5 @@
+/** @file ESM bootstrap — initializes Worker bridge, dynamically loads engine-runtime + UI, and exposes devtools helpers. */
+
 import { gameState, moundState, loadStateFromLocalStorage } from "./state.js";
 import {
   getWorkerBridge,

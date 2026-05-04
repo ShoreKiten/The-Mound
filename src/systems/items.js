@@ -1,3 +1,5 @@
+/** @file Item registry — resource/item definitions with labels and descriptions. */
+
 window.MoundData = window.MoundData || {};
 window.MoundData.itemRegistry = {
   stardust: {

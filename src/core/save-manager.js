@@ -1,3 +1,5 @@
+/** @file Save/load manager — serializes game state to localStorage with format migration support. */
+
 import { moundState } from "./state.js";
 import { getEngineApi, getUiApi, setStorageNeedsRender } from "./runtime-hooks.js";
 import { syncColonyCapacityInDraft } from "../systems/colony-cap.js";

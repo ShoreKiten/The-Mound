@@ -1,3 +1,5 @@
+/** @file Bridge hooks — UI API, Worker bridge, and render scheduling shared across core, systems, and UI layers. */
+
 const runtimeState = {
   workerBridge: null,
   workerMode: "full",

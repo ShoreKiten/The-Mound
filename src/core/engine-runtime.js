@@ -1,3 +1,5 @@
+/** @file Main game engine — resource actions, production loop, expedition tick, combat bridge, and MoundEngine API. */
+
 import { gameState, moundState } from "./state.js";
 import {
   pullEventTextById,
@@ -8,7 +10,7 @@ import { saveGame } from "./storage.js";
 import { showMajorDecision } from "../ui/bridge.js";
 import { applyResourceTickStep } from "../systems/economy/index.js";
 import { canAfford as economyCanAfford, deduct as economyDeduct } from "../systems/economy/manager.js";
-import { getBuildingCost } from "../data/building-data.js";
+import { getBuildingCost } from "../systems/building-data.js";
 /** Expedition + encounter pipeline (canonical; do not import removed `expedition/runtime.js`). */
 import {
   getExpeditionDistance as resolveExpeditionDistance,
@@ -45,6 +47,8 @@ const storage = {
 };
 
 let tickHandle = null;
+let resourceTickHandle = null;
+let lastResourceTickAt = 0;
 let drifterTimer = null;
 let tickCount = 0;
 let lastFeedLogTick = -60;
@@ -758,6 +762,9 @@ function tryBuildStructure(structureId, cost, applyBuilt) {
   if (uiApi && typeof uiApi.syncResourceBarVisuals === "function") {
     uiApi.syncResourceBarVisuals(true);
   }
+  if (uiApi && typeof uiApi.renderAll === "function") {
+    uiApi.renderAll(true);
+  }
   return true;
 }
 
@@ -791,39 +798,19 @@ function meltIceOre() {
   return true;
 }
 
-function runMagneticArray() {
+function runMagneticArray(dtSec) {
   if (state.arrays <= 0) {
     return;
   }
-  setState((draft) => {
-    draft.resources.scrapMetal += draft.arrays * 7.2;
-  });
-}
-
-function autoFeedFurnace() {
-  if (state.population <= 0 || state.resources.scrapMetal < 0.2) {
+  const step = Math.max(0, Number(dtSec || 0));
+  if (step <= 0) {
     return;
   }
-  if (state.resources.power > 90) {
-    return;
-  }
-  const scrapNeedPerSec = 1 / 5;
-  const bonus = state.population >= 5 ? 1.2 : 1.0;
-  const powerGainPerSec = state.population * 10 * bonus;
-  const scale = Math.min(1, state.resources.scrapMetal / scrapNeedPerSec);
-  const actualScrapCost = scrapNeedPerSec * scale;
-  const actualPowerGain = powerGainPerSec * scale;
+  const productionBonus = (1 + (state.systems && state.systems.productionSpeedBonusPct || 0)) * (state.globalProdMod > 0 ? state.globalProdMod : 1);
+  const gain = state.arrays * 0.36 * productionBonus * step;
   setState((draft) => {
-    draft.resources.scrapMetal = Math.max(0, draft.resources.scrapMetal - actualScrapCost);
-    draft.resources.power += actualPowerGain;
-    draft.ReactorCoreActive = true;
-    draft.systems.reactorActive = true;
-    draft.systems.reactorShutdownLogged = false;
+    draft.resources.scrapMetal += gain;
   });
-  if (tickCount - lastFeedLogTick >= 60) {
-    addLog("载员将废料投入熔炉。");
-    lastFeedLogTick = tickCount;
-  }
 }
 
 function upgradeCoreEfficiency() {
@@ -2012,6 +1999,27 @@ function startEngine() {
     clearInterval(tickHandle);
     tickHandle = null;
   }
+  if (resourceTickHandle) {
+    clearInterval(resourceTickHandle);
+    resourceTickHandle = null;
+  }
+
+  // Always run resource production on the main thread — independent of Worker.
+  // This guarantees scrapMetal / stardust / alloy / sealant accumulation even when
+  // the Worker sends no STATE_PATCH delta (idle, no expedition, etc.).
+  lastResourceTickAt = Date.now();
+  resourceTickHandle = setInterval(() => {
+    const now = Date.now();
+    const dtSec = Math.max(0.05, (now - lastResourceTickAt) / 1000);
+    lastResourceTickAt = now;
+    try {
+      updateRates();
+      applyResourceTickStep(state, setState, dtSec);
+      updateRates();
+    } catch (prodError) {
+      console.warn("[ResourceTick] production step failed:", prodError);
+    }
+  }, Math.max(50, Number(getLogicTickMs() || 100)));
   const workerBridge = getWorkerBridge();
   const workerModeEnabled = getWorkerMode() === "full";
   if (
@@ -2133,13 +2141,9 @@ function startEngine() {
             showMajorDecision(data.control.showMajorDecision);
           }
         }
-        // Keep automation/resource simulation active in worker-heart mode
-        // while preventing callback errors from crashing UI rendering.
+        // Keep beacon/survivor simulation active in worker-heart mode;
+        // resource production runs on the main-thread resourceTickHandle.
         try {
-          if (typeof updateRates === "function") {
-            updateRates();
-          }
-          applyResourceTickStep(state, setState, dtSec);
           let beaconArrivalSuccessNow = false;
           let beaconArrivalFailedNow = false;
           setState((draft) => {
@@ -2170,9 +2174,6 @@ function startEngine() {
             }
           } else if (beaconArrivalFailedNow) {
             addLog("警告：由于舱位不足，响应信号的幸存者被迫离开了。");
-          }
-          if (typeof updateRates === "function") {
-            updateRates();
           }
           debugPowerTickTrace();
           if (typeof updateUiAutomationState === "function") {
@@ -2359,9 +2360,7 @@ function startEngine() {
       addLog("[警告] 远征控制回路异常，已自动切换安全模式。");
     }
     processDeepSpaceLogEvent(now);
-    updateRates();
-    applyResourceTickStep(state, setState, dtSec);
-    updateRates();
+    // Resource production runs on the separate resourceTickHandle interval.
     debugPowerTickTrace();
     updateUiAutomationState();
     if (state.isVaultRepaired && state.oxygen < 20 && !state.systems.oxygenCriticalLogged) {
@@ -2392,6 +2391,11 @@ function stopEngine() {
     clearInterval(tickHandle);
     tickHandle = null;
   }
+  if (resourceTickHandle) {
+    clearInterval(resourceTickHandle);
+    resourceTickHandle = null;
+  }
+  lastResourceTickAt = 0;
   lastExpeditionTickAt = 0;
   lastDistanceEventCheckAt = 0;
 }

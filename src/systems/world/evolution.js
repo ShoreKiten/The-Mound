@@ -1,3 +1,5 @@
+/** @file World evolution — handles colony/expedition progression state transitions. */
+
 import { gameState as rootGameState, moundState } from "../../core/state.js";
 import { getWorkerMode, getWorkerBridge, getEngineApi } from "../../core/runtime-hooks.js";
 

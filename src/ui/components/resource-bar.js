@@ -1,3 +1,5 @@
+/** @file Resource bar utilities — rate formatting, tooltip HTML generation, CSS class helpers. */
+
 export function formatRate(value) {
   const sign = value >= 0 ? "+" : "";
   return `${sign}${value.toFixed(2)}/s`;

@@ -1,3 +1,5 @@
+/** @file Reusable UI component factories — atomic DOM writer, research panel, outpost menu, resource bar helpers. */
+
 import { MoundEngine } from "../core/engine-runtime.js";
 import { gameState, moundState } from "../core/state.js";
 import { computePopulationCap } from "../systems/colony-cap.js";
@@ -418,7 +420,7 @@ export function renderOutpostExchangeBody(api) {
     const balance = document.createElement("div");
     balance.className = "outpost-modal-intro";
     balance.textContent =
-      `星尘 ${Math.floor(state.resources.stardust || 0)} ｜ 废金属 ${Math.floor(state.resources.scrapMetal || 0)} ｜ 密封剂 ${Math.floor(state.resources.sealant || 0)} ｜ 氦-3 ${Math.floor(state.resources.helium3 || 0)}`;
+      `星尘 ${Math.round(state.resources.stardust || 0)} ｜ 废金属 ${Math.round(state.resources.scrapMetal || 0)} ｜ 密封剂 ${Math.round(state.resources.sealant || 0)} ｜ 氦-3 ${Math.round(state.resources.helium3 || 0)}`;
     content.appendChild(balance);
 
     const note = document.createElement("div");
